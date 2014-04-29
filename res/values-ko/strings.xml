@@ -5,4 +5,5 @@
     <string name="action_settings">설정</string>
     <string name="hello_world">건광 종합 관리 앱</string>
 
+    <string name="change-test">수정사항 테스트</string>
 </resources>
