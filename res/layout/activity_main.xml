@@ -1,12 +1,44 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/baseLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     >
-    <CalendarView
+    <FrameLayout
+        android:id="@+id/month_title"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/calendar"
-        />
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/txtMonthTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#FFFF00"
+            android:layout_gravity="center"
+            android:textSize="16sp"
+            android:paddingLeft="10dip"
+            android:paddingTop="10dip"
+            android:paddingRight="10dip"
+            android:paddingBottom="10dip"
+            android:text="@string/change_test"
+            />
+    </FrameLayout>
+    <LinearLayout android:id="@+id/day_of_week_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" />
+
+    <LinearLayout android:id="@+id/display_week1" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <LinearLayout android:id="@+id/day1" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" />
+        <LinearLayout android:layout_width="1dip" android:layout_height="match_parent" android:background="#000000" />
+        <LinearLayout android:id="@+id/day2" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" />
+        <LinearLayout android:layout_width="1dip" android:layout_height="match_parent" android:background="#000000" />
+        <LinearLayout android:id="@+id/day3" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" />
+        <LinearLayout android:layout_width="1dip" android:layout_height="match_parent" android:background="#000000" />
+        <LinearLayout android:id="@+id/day4" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" />
+        <LinearLayout android:layout_width="1dip" android:layout_height="match_parent" android:background="#000000" />
+        <LinearLayout android:id="@+id/day5" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" />
+        <LinearLayout android:layout_width="1dip" android:layout_height="match_parent" android:background="#000000" />
+        <LinearLayout android:id="@+id/day6" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" />
+        <LinearLayout android:layout_width="1dip" android:layout_height="match_parent" android:background="#000000" />
+        <LinearLayout android:id="@+id/day7" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" />
+    </LinearLayout>
 </LinearLayout>
