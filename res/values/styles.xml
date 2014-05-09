@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -15,6 +15,76 @@
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+    
+    <style name="MonthTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingLeft">10dip</item>
+        <item name="android:paddingTop">10dip</item>
+        <item name="android:paddingRight">10dip</item>
+        <item name="android:paddingBottom">10dip</item>
+        <item name="android:background">#FFFF00</item>
+    </style>
+    
+    <style name="MonthMoveTextView" parent="MonthTitle">
+        <item name="android:background">#005500</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="DayTitle">
+        <item name="android:layout_width">@dimen/day_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:onClick">onClick</item>
+    </style>
+    
+    <style name="DayTitleSep">
+        <item name="android:layout_width">@dimen/sep_width</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/day_sep_color</item>
+    </style>
+    
+    <style name="WeekGroup">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/day_height</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+    
+    <style name="DayGroup">
+        <item name="android:layout_width">@dimen/day_width</item>
+        <item name="android:layout_height">@dimen/day_height</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:onClick">onClick</item>
+    </style>
+    
+    <style name="Day">
+        <item name="android:layout_width">@dimen/day_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:onClick">onClick</item>
+    </style>
+    
+    <style name="DayLog" parent="Day">
+        <item name="android:paddingLeft">2dip</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:onClick">onClick</item>
+    </style>
+    
+    <style name="DaySep">
+        <item name="android:layout_width">@dimen/sep_width</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/day_sep_color</item>
+    </style>
+    
+    <style name="WeekSep">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/sep_height</item>
+        <item name="android:background">@color/day_sep_color</item>
     </style>
 
 </resources>

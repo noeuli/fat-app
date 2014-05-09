@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">팻 앱</string>
+    <string name="app_name">Calendar Log View</string>
     <string name="action_settings">설정</string>
     <string name="hello_world">건광 종합 관리 앱</string>
 
