@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.provider.CalendarContract.CalendarEntity;
+import android.provider.CalendarContract.EventsEntity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -104,9 +105,11 @@ public class MainActivity extends Activity implements OnClickListener {
         }
     }
 
+    private final String CALENDAR_URI = "content://com.android.calendar";
+
+    // Find out calendar id
     private void getCalendarTest() {
-        final String CONTENT_URI = "content://com.android.calendar";
-        Uri uri = Uri.parse(CONTENT_URI + "/calendars");
+        Uri calendarUri = Uri.parse(CALENDAR_URI + "/calendars");
         String[] selection = new String[] {
                 CalendarEntity._ID,
                 CalendarEntity.ACCOUNT_NAME,
@@ -117,8 +120,8 @@ public class MainActivity extends Activity implements OnClickListener {
                 CalendarEntity.OWNER_ACCOUNT,
         };
         Cursor c = getContentResolver().query(
-                uri, selection,
-                null, null, null);
+                calendarUri, selection,
+                "calendar_access_level>=600", null, null);
         if (c==null || !c.moveToFirst()) {
             // System does not have any calendars.
             Log.e(TAG, "No Calenders found.");
@@ -144,6 +147,12 @@ public class MainActivity extends Activity implements OnClickListener {
         } finally {
             c.close();
         }
+    }
+
+    // Query events list using given calender id
+    private void queryEventList(String calendarId) {
+        Uri eventsUri = Uri.parse(CALENDAR_URI + "/events");
+
     }
 	
 	private void setupMonthTitle() {
