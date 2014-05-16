@@ -62,12 +62,15 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private void setupViews() {
 	    findViews();
-	    
-	    // get today
-	    Calendar calendar = Calendar.getInstance();
-	    
+
 	    // display this month
-        getCalendarTest();
+        setupDisplayMonth();
+        getMonthInfo();
+        drawCalendar();
+
+        // display event list
+        //getCalendarTest();
+        //getCalendarEventList();
 	}
 	
 	private void findViews() {
@@ -106,6 +109,54 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private final String CALENDAR_URI = "content://com.android.calendar";
+    private final int INVALID_ID = -1;
+    private int mCalendarId = INVALID_ID;
+
+    private Calendar mDisplayMonth;
+    private Date mFirstDate;
+    private Date mLastDate;
+
+    private void setupDisplayMonth() {
+        // Get today and clear time of day
+        mDisplayMonth = Calendar.getInstance();
+        mDisplayMonth.set(Calendar.HOUR_OF_DAY, 0);   // clear() would not reset the hour of day
+        mDisplayMonth.clear(Calendar.MINUTE);
+        mDisplayMonth.clear(Calendar.SECOND);
+        mDisplayMonth.clear(Calendar.MILLISECOND);
+    }
+
+    private void moveToPrevMonth() {
+        mDisplayMonth.add(Calendar.MONTH, -1);
+    }
+
+    private void moveToNextMonth() {
+        mDisplayMonth.add(Calendar.MONTH, 1);
+    }
+
+    int mDayOfWeek;
+
+    private void getMonthInfo() {
+        // Get start of this month in milliseconds
+        mDisplayMonth.set(Calendar.DAY_OF_MONTH, 1);
+        mFirstDate = mDisplayMonth.getTime();
+        mDayOfWeek = mDisplayMonth.get(Calendar.DAY_OF_WEEK);
+
+        // Get end of this month
+        mDisplayMonth.add(Calendar.MONTH, 1);
+        mDisplayMonth.add(Calendar.DATE, -1);
+        mLastDate = mDisplayMonth.getTime();
+    }
+
+    private void drawCalendar() {
+        int weeks = mDayViewList.size();
+        Log.d(TAG, "drawCalendar() date=" + mDisplayMonth + " mDayOfWeek=" + mDayOfWeek
+                + " viewArraySize=" + mDayViewList.size());
+
+        for (int week=0; week<mDayViewList.size(); week++) {
+            ArrayList<LinearLayout> oneWeek = mDayViewList.get(week);
+        }
+
+    }
 
     // Find out calendar id
     private void getCalendarTest() {
@@ -119,9 +170,13 @@ public class MainActivity extends Activity implements OnClickListener {
                 CalendarEntity.CALENDAR_ACCESS_LEVEL,
                 CalendarEntity.OWNER_ACCOUNT,
         };
+        String[] condition = new String[] {
+                "600",
+                CalendarContract.ACCOUNT_TYPE_LOCAL,
+        };
         Cursor c = getContentResolver().query(
                 calendarUri, selection,
-                "calendar_access_level>=600", null, null);
+                "calendar_access_level>=? and account_type<>?", condition, null);
         if (c==null || !c.moveToFirst()) {
             // System does not have any calendars.
             Log.e(TAG, "No Calenders found.");
@@ -137,11 +192,70 @@ public class MainActivity extends Activity implements OnClickListener {
 
             ArrayList<CalendarRecord> records = new ArrayList<CalendarRecord>();
 
-            while (c.moveToNext()) {
+            do {
+                if (mCalendarId==INVALID_ID) mCalendarId = c.getInt(0);
                 CalendarRecord r = new CalendarRecord(c.getInt(0), c.getString(1), c.getString(2),
                         c.getString(3), c.getString(4), c.getInt(5), c.getString(6));
                 Log.d(TAG, "getCalendarTest() [" + (i++) + "] record:\n" + r);
-            }
+            } while (c.moveToNext());
+        } catch (Exception e) {
+            Log.e(TAG, "Error : Exception occurred on getCalendarTest()." , e);
+        } finally {
+            c.close();
+        }
+    }
+
+    private void getCalendarEventList() {
+        Log.d(TAG, "getCalendarEventList() id=" + mCalendarId);
+        if (mCalendarId == INVALID_ID) return;
+
+        Uri eventListUri = Uri.parse(CALENDAR_URI + "/events");
+
+        String[] selection = new String[] {
+                EventsEntity.TITLE,
+                EventsEntity.DTSTART,
+                EventsEntity.DTEND,
+        };
+
+        StringBuilder where = new StringBuilder("calendar_id=?");
+        where.append("and (dtstart>=? or dtend>=?)");
+        where.append("and (dtstart<=? or dtend<=?)");
+
+        String[] condition = new String[] {
+                String.valueOf(mCalendarId),
+                String.valueOf(mFirstDate.getTime()),
+                String.valueOf(mFirstDate.getTime()),
+                String.valueOf(mLastDate.getTime()),
+                String.valueOf(mLastDate.getTime()),
+        };
+
+        Cursor c = getContentResolver().query(
+                eventListUri, selection,
+                where.toString(), condition, null);
+
+        if (c==null || !c.moveToFirst()) {
+            // Calendar does not have any events.
+            Log.d(TAG, "No events foud.");
+            return;
+        }
+
+        try {
+            int i = 0;
+            int rows = c.getCount();
+            int cols = c.getColumnCount();
+
+            Log.w(TAG, "getCalendarEventList() count=" + rows + " cols=" + cols);
+
+            do {
+                StringBuilder record =
+                        new StringBuilder("getCalendarEventList() [" + (i++) + "] record:\n");
+                for (int col=0; col<cols; col++) {
+                    record.append("\t[" + col + "][" + c.getColumnName(col) + "]=["
+                            + c.getString(col) + "]\n");
+                }
+                Log.d(TAG, record.toString());
+
+            } while (c.moveToNext());
         } catch (Exception e) {
 
         } finally {
