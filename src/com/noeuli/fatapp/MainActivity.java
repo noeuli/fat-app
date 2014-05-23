@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -25,9 +26,52 @@ public class MainActivity extends Activity implements OnClickListener {
     private static final String TAG = "MainActivity";
     
     private TextView mTextMonthTitle;
-    private ArrayList<Object> mDayViewList;
-    
-	@Override
+    private class WeekArray {
+        private ArrayList<LinearLayout> mWeekList;
+
+        public WeekArray() {
+            mWeekList = new ArrayList<LinearLayout>();
+        }
+
+        public void add(LinearLayout day) {
+            mWeekList.add(day);
+        }
+
+        public int size() {
+            return mWeekList.size();
+        }
+
+        public void setDate(int week, int day, String strDate) {
+            int resId = DAY_TEXTVIEW_ID[week][day];
+            LinearLayout dayGroup = mWeekList.get(day);
+            TextView txtDate = (TextView) dayGroup.findViewById(resId);
+            if (strDate == null) strDate = "";
+            txtDate.setText(strDate);
+            txtDate.setTag(strDate);
+            dayGroup.setTag(strDate);
+        }
+    }
+    private ArrayList<WeekArray> mDayViewList;
+
+    final int[][] DYAGROUP_ID = new int[][]{
+            {R.id.day1group, R.id.day2group, R.id.day3group, R.id.day4group, R.id.day5group, R.id.day6group, R.id.day7group,},
+            {R.id.day8group, R.id.day9group, R.id.day10group, R.id.day11group, R.id.day12group, R.id.day13group, R.id.day14group,},
+            {R.id.day15group, R.id.day16group, R.id.day17group, R.id.day18group, R.id.day19group, R.id.day20group, R.id.day21group,},
+            {R.id.day22group, R.id.day23group, R.id.day24group, R.id.day25group, R.id.day26group, R.id.day27group, R.id.day28group,},
+            {R.id.day29group, R.id.day30group, R.id.day31group, R.id.day32group, R.id.day33group, R.id.day34group, R.id.day35group,},
+            {R.id.day36group, R.id.day37group, R.id.day38group, R.id.day39group, R.id.day40group, R.id.day41group, R.id.day42group,},
+    };
+
+    final int[][] DAY_TEXTVIEW_ID = new int[][]{
+            {R.id.day1, R.id.day2, R.id.day3, R.id.day4, R.id.day5, R.id.day6, R.id.day7,},
+            {R.id.day8, R.id.day9, R.id.day10, R.id.day11, R.id.day12, R.id.day13, R.id.day14,},
+            {R.id.day15, R.id.day16, R.id.day17, R.id.day18, R.id.day19, R.id.day20, R.id.day21,},
+            {R.id.day22, R.id.day23, R.id.day24, R.id.day25, R.id.day26, R.id.day27, R.id.day28,},
+            {R.id.day29, R.id.day30, R.id.day31, R.id.day32, R.id.day33, R.id.day34, R.id.day35,},
+            {R.id.day36, R.id.day37, R.id.day38, R.id.day39, R.id.day40, R.id.day41, R.id.day42,},
+    };
+
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -36,41 +80,26 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 	
 	private void setupCalendarList() {
-        mDayViewList = new ArrayList<Object>();
+        mDayViewList = new ArrayList<WeekArray>();
 
-        ArrayList<LinearLayout> weekList = null;
         LinearLayout day = null;
-        int[][] firstDayIdArray = new int[][]{
-                {R.id.day1group, R.id.day2group, R.id.day3group, R.id.day4group, R.id.day5group, R.id.day6group, R.id.day7group,},
-                {R.id.day8group, R.id.day9group, R.id.day10group, R.id.day11group, R.id.day12group, R.id.day13group, R.id.day14group,},
-                {R.id.day15group, R.id.day16group, R.id.day17group, R.id.day18group, R.id.day19group, R.id.day20group, R.id.day21group,},
-                {R.id.day22group, R.id.day23group, R.id.day24group, R.id.day25group, R.id.day26group, R.id.day27group, R.id.day28group,},
-                {R.id.day29group, R.id.day30group, R.id.day31group, R.id.day32group, R.id.day33group, R.id.day34group, R.id.day35group,},
-                {R.id.day36group, R.id.day37group, R.id.day38group, R.id.day39group, R.id.day40group, R.id.day41group, R.id.day42group,},
-        };
 
         for (int i = 0; i < 6; i++) {
-            weekList = new ArrayList<LinearLayout>();
+            WeekArray weekArray = new WeekArray();
             for (int j = 0; j < 7; j++) {
-                int resId = firstDayIdArray[i][j];
+                int resId = DYAGROUP_ID[i][j];
                 day = (LinearLayout) findViewById(resId);
-                weekList.add(day);
+                weekArray.add(day);
             }
-            mDayViewList.add(weekList);
+            mDayViewList.add(weekArray);
         }
     }
 
     private void setupViews() {
 	    findViews();
-
 	    // display this month
         setupDisplayMonth();
-        getMonthInfo();
-        drawCalendar();
-
-        // display event list
-        //getCalendarTest();
-        //getCalendarEventList();
+        showMonth();
 	}
 	
 	private void findViews() {
@@ -125,6 +154,31 @@ public class MainActivity extends Activity implements OnClickListener {
         mDisplayMonth.clear(Calendar.MILLISECOND);
     }
 
+    private void showPrevMonth() {
+        moveToPrevMonth();
+        showMonth();
+    }
+
+    private void showNextMonth() {
+        moveToNextMonth();
+        showMonth();
+    }
+
+    private void showMonth() {
+        getMonthInfo();
+        drawCalendar();
+        showMonthTitle();
+
+        // display event list
+        //getCalendarTest();
+        //getCalendarEventList();
+    }
+
+    private void showMonthTitle() {
+        mTextMonthTitle.setText(mDisplayMonth.get(Calendar.YEAR) + "년 "
+                + (mDisplayMonth.get(Calendar.MONTH)+1) + "월");
+    }
+
     private void moveToPrevMonth() {
         mDisplayMonth.add(Calendar.MONTH, -1);
     }
@@ -133,27 +187,50 @@ public class MainActivity extends Activity implements OnClickListener {
         mDisplayMonth.add(Calendar.MONTH, 1);
     }
 
-    int mDayOfWeek;
+    int mFirstDayOfWeek;
+    int mLastDayOfWeek;
 
     private void getMonthInfo() {
         // Get start of this month in milliseconds
         mDisplayMonth.set(Calendar.DAY_OF_MONTH, 1);
         mFirstDate = mDisplayMonth.getTime();
-        mDayOfWeek = mDisplayMonth.get(Calendar.DAY_OF_WEEK);
+        mFirstDayOfWeek = mDisplayMonth.get(Calendar.DAY_OF_WEEK);
 
         // Get end of this month
         mDisplayMonth.add(Calendar.MONTH, 1);
         mDisplayMonth.add(Calendar.DATE, -1);
         mLastDate = mDisplayMonth.getTime();
+        mLastDayOfWeek = mDisplayMonth.get(Calendar.DAY_OF_WEEK);
     }
 
     private void drawCalendar() {
         int weeks = mDayViewList.size();
-        Log.d(TAG, "drawCalendar() date=" + mDisplayMonth + " mDayOfWeek=" + mDayOfWeek
-                + " viewArraySize=" + mDayViewList.size());
+        int weekOfMonth = mDisplayMonth.get(Calendar.WEEK_OF_MONTH);
+        int day = 0;
+
+        Log.d(TAG, "drawCalendar() date=" + mDisplayMonth + "\nmFirstDayOfWeek=" + mFirstDayOfWeek
+                + " weekOfMonth=" + weekOfMonth + " viewArraySize=" + mDayViewList.size());
 
         for (int week=0; week<mDayViewList.size(); week++) {
-            ArrayList<LinearLayout> oneWeek = mDayViewList.get(week);
+            WeekArray oneWeek = mDayViewList.get(week);
+
+            for (int dayIndex=0; dayIndex<7; dayIndex++) {
+                String strDay = null;
+                if (week==0) {
+                    // First Week
+                    if (dayIndex+1 >= mFirstDayOfWeek) {
+                        strDay = Integer.toString(++day);
+                    }
+                } else if (week+1==weekOfMonth) {
+                    // Last week
+                    if (dayIndex < mLastDayOfWeek) {
+                        strDay = Integer.toString(++day);
+                    }
+                } else if (week<weekOfMonth) {
+                    strDay = Integer.toString(++day);
+                }
+                oneWeek.setDate(week, dayIndex, strDay);
+            }
         }
 
     }
@@ -296,7 +373,33 @@ public class MainActivity extends Activity implements OnClickListener {
     public void onClick(View v) {
         if (v==null) return;
         int id = v.getId();
-        Log.d(TAG, "onClick() view=" + v + " id=" + id);
+
+        Log.d(TAG, "onClick() id=" + id + " v=" + v);
+
+        if (v instanceof LinearLayout) {
+            Object tag = v.getTag();
+            if (tag instanceof String) {
+                String strDay = (String)tag;
+                if (!"".equals(strDay)) showToast((String)tag);
+            }
+        } else if (id == R.id.txtPrevMonth) {
+            showPrevMonth();
+
+        } else if (id == R.id.txtNextMonth) {
+            showNextMonth();
+        } else {
+
+        }
+    }
+
+    private Toast mToast = null;
+    private void showToast(String msg) {
+        if (mToast == null) {
+            mToast = Toast.makeText(this, msg, Toast.LENGTH_SHORT);
+        } else {
+            mToast.setText(msg);
+        }
+        if (mToast != null) mToast.show();
     }
 
 }

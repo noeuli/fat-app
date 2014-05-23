@@ -32,6 +32,8 @@
     <style name="MonthMoveTextView" parent="MonthTitle">
         <item name="android:background">#005500</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:clickable">true</item>
+        <item name="android:onClick">onClick</item>
     </style>
     
     <style name="DayTitle">
