@@ -300,6 +300,18 @@ public class MainActivity extends Activity implements OnClickListener {
             mStartTime = start;
             mEndTime = end;
         }
+        
+        public String getTitle() {
+        	return mTitle;
+        }
+        
+        public long getStartTime() {
+        	return mStartTime;
+        }
+        
+        public long getEndTime() {
+        	return mEndTime;
+        }
     }
     private ArrayList<CalendarEventList> mCalendarEventList = new ArrayList<CalendarEventList>();
 
