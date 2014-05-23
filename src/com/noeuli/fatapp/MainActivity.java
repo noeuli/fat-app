@@ -26,6 +26,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private static final String TAG = "MainActivity";
     
     private TextView mTextMonthTitle;
+    
     private class WeekArray {
         private ArrayList<LinearLayout> mWeekList;
 
@@ -98,7 +99,8 @@ public class MainActivity extends Activity implements OnClickListener {
     private void setupViews() {
 	    findViews();
 	    // display this month
-        setupDisplayMonth();
+	    initMonth();
+        initCalendarId();
         showMonth();
 	}
 	
@@ -145,7 +147,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private Date mFirstDate;
     private Date mLastDate;
 
-    private void setupDisplayMonth() {
+    private void initMonth() {
         // Get today and clear time of day
         mDisplayMonth = Calendar.getInstance();
         mDisplayMonth.set(Calendar.HOUR_OF_DAY, 0);   // clear() would not reset the hour of day
@@ -168,10 +170,16 @@ public class MainActivity extends Activity implements OnClickListener {
         getMonthInfo();
         drawCalendar();
         showMonthTitle();
-
-        // display event list
-        //getCalendarTest();
-        //getCalendarEventList();
+        showEvent();
+    }
+    
+    private void showEvent() {
+        getCalendarEventList();
+        showCalendarEventList();
+    }
+    
+    private void showCalendarEventList() {
+        
     }
 
     private void showMonthTitle() {
@@ -235,8 +243,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
     }
 
-    // Find out calendar id
-    private void getCalendarTest() {
+    // Find out calendar id and save into mCalendarId
+    private void initCalendarId() {
         Uri calendarUri = Uri.parse(CALENDAR_URI + "/calendars");
         String[] selection = new String[] {
                 CalendarEntity._ID,
@@ -265,7 +273,7 @@ public class MainActivity extends Activity implements OnClickListener {
             int rows = c.getCount();
             int cols = c.getColumnCount();
 
-            Log.w(TAG, "getCalendarTest() count=" + rows + " cols=" + cols);
+            Log.w(TAG, "initCalendarId() count=" + rows + " cols=" + cols);
 
             ArrayList<CalendarRecord> records = new ArrayList<CalendarRecord>();
 
@@ -273,14 +281,27 @@ public class MainActivity extends Activity implements OnClickListener {
                 if (mCalendarId==INVALID_ID) mCalendarId = c.getInt(0);
                 CalendarRecord r = new CalendarRecord(c.getInt(0), c.getString(1), c.getString(2),
                         c.getString(3), c.getString(4), c.getInt(5), c.getString(6));
-                Log.d(TAG, "getCalendarTest() [" + (i++) + "] record:\n" + r);
+                Log.d(TAG, "initCalendarId() [" + (i++) + "] record:\n" + r);
             } while (c.moveToNext());
         } catch (Exception e) {
-            Log.e(TAG, "Error : Exception occurred on getCalendarTest()." , e);
+            Log.e(TAG, "Error : Exception occurred on initCalendarId()." , e);
         } finally {
             c.close();
         }
     }
+    
+    private class CalendarEventList {
+        String mTitle;
+        long mStartTime;
+        long mEndTime;
+        
+        public CalendarEventList(String title, long start, long end) {
+            mTitle = title;
+            mStartTime = start;
+            mEndTime = end;
+        }
+    }
+    private ArrayList<CalendarEventList> mCalendarEventList = new ArrayList<CalendarEventList>();
 
     private void getCalendarEventList() {
         Log.d(TAG, "getCalendarEventList() id=" + mCalendarId);
