@@ -313,9 +313,9 @@ public class MainActivity extends Activity implements OnClickListener {
         	return mEndTime;
         }
         
-        public void foo() {
-        	Log.d(TAG, "foo() git test");
-        }
+//        public void foo() {
+//        	Log.d(TAG, "foo() git test");
+//        }
     }
     private ArrayList<CalendarEventList> mCalendarEventList = new ArrayList<CalendarEventList>();
 
