@@ -1,5 +1,13 @@
 package com.noeuli.fatapp;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,12 +22,6 @@ import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 public class MainActivity extends Activity implements OnClickListener {
     private static final boolean LOGD = true;
@@ -38,9 +40,9 @@ public class MainActivity extends Activity implements OnClickListener {
             mWeekList.add(day);
         }
 
-        public int size() {
-            return mWeekList.size();
-        }
+//        public int size() {
+//            return mWeekList.size();
+//        }
 
         public void setDate(int week, int day, String strDate) {
             int resId = DAY_TEXTVIEW_ID[week][day];
@@ -178,10 +180,6 @@ public class MainActivity extends Activity implements OnClickListener {
         showCalendarEventList();
     }
     
-    private void showCalendarEventList() {
-        
-    }
-
     private void showMonthTitle() {
         mTextMonthTitle.setText(mDisplayMonth.get(Calendar.YEAR) + "년 "
                 + (mDisplayMonth.get(Calendar.MONTH)+1) + "월");
@@ -212,7 +210,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private void drawCalendar() {
-        int weeks = mDayViewList.size();
+//        int weeks = mDayViewList.size();
         int weekOfMonth = mDisplayMonth.get(Calendar.WEEK_OF_MONTH);
         int day = 0;
 
@@ -275,7 +273,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
             Log.w(TAG, "initCalendarId() count=" + rows + " cols=" + cols);
 
-            ArrayList<CalendarRecord> records = new ArrayList<CalendarRecord>();
+//            ArrayList<CalendarRecord> records = new ArrayList<CalendarRecord>();
 
             do {
                 if (mCalendarId==INVALID_ID) mCalendarId = c.getInt(0);
@@ -290,38 +288,53 @@ public class MainActivity extends Activity implements OnClickListener {
         }
     }
     
-    private class CalendarEventList {
-        String mTitle;
-        long mStartTime;
-        long mEndTime;
+    private class CalendarEvent {
+        private String mTitle;
+        private long mStartTime;
+        private long mEndTime;
+        private String mTimeZone;
         
-        public CalendarEventList(String title, long start, long end) {
+        public CalendarEvent(String title, long start, long end, String timeZone) {
             mTitle = title;
             mStartTime = start;
             mEndTime = end;
+            mTimeZone = timeZone;
         }
         
         public String getTitle() {
-        	return mTitle;
+             return mTitle;
         }
         
         public long getStartTime() {
-        	return mStartTime;
+            return mStartTime;
         }
         
         public long getEndTime() {
-        	return mEndTime;
+            return mEndTime;
         }
         
-//        public void foo() {
-//        	Log.d(TAG, "foo() git test");
-//        }
+        public String toString() {
+            return "[" + mTitle + "] " + getTime(mStartTime, mTimeZone) + "~" + getTime(mEndTime, mTimeZone);
+        }
     }
-    private ArrayList<CalendarEventList> mCalendarEventList = new ArrayList<CalendarEventList>();
+    
+    String getTime(long dateInMillis, String timeZone) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/M/d h:mm/z", Locale.KOREA); 
+        formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+        String dateString = formatter.format(new Date(dateInMillis));
+        return dateString;
+    }
+    
+    private ArrayList<CalendarEvent> mCalendarEventList = new ArrayList<CalendarEvent>();
 
     private void getCalendarEventList() {
         Log.d(TAG, "getCalendarEventList() id=" + mCalendarId);
         if (mCalendarId == INVALID_ID) return;
+        
+        if (mCalendarEventList == null) {
+            mCalendarEventList = new ArrayList<CalendarEvent>();
+        }
+        mCalendarEventList.clear();
 
         Uri eventListUri = Uri.parse(CALENDAR_URI + "/events");
 
@@ -329,6 +342,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 EventsEntity.TITLE,
                 EventsEntity.DTSTART,
                 EventsEntity.DTEND,
+                EventsEntity.EVENT_TIMEZONE,
         };
 
         StringBuilder where = new StringBuilder("calendar_id=?");
@@ -361,14 +375,15 @@ public class MainActivity extends Activity implements OnClickListener {
             Log.w(TAG, "getCalendarEventList() count=" + rows + " cols=" + cols);
 
             do {
-                StringBuilder record =
-                        new StringBuilder("getCalendarEventList() [" + (i++) + "] record:\n");
-                for (int col=0; col<cols; col++) {
-                    record.append("\t[" + col + "][" + c.getColumnName(col) + "]=["
-                            + c.getString(col) + "]\n");
-                }
-                Log.d(TAG, record.toString());
+                String title = c.getString(0);
+                long start = c.getLong(1);
+                long end = c.getLong(2);
+                String timeZone = c.getString(3);
+                
+                CalendarEvent event = new CalendarEvent(title, start, end, timeZone); 
+                mCalendarEventList.add(event);
 
+                Log.d(TAG, "getCalendarEventList() [" + (i++) + "] record:" + event);
             } while (c.moveToNext());
         } catch (Exception e) {
 
@@ -377,17 +392,58 @@ public class MainActivity extends Activity implements OnClickListener {
         }
     }
 
-    // Query events list using given calender id
-    private void queryEventList(String calendarId) {
-        Uri eventsUri = Uri.parse(CALENDAR_URI + "/events");
+    private void showCalendarEventList() {
+        if (mCalendarEventList == null || mCalendarEventList.size() == 0) {
+            Log.w(TAG, "showCalendarEventList(): Nothing to show.");
+            return;
+        }
 
+        if (LOGD) Log.d(TAG, "showCalendarEventList() size=" + mCalendarEventList.size() + " timezone=" + TimeZone.getDefault());
+        
+        for (int i=0; i<mCalendarEventList.size(); i++) {
+            CalendarEvent event = mCalendarEventList.get(i);
+            String title = event.getTitle();
+            long sdate = event.getStartTime();
+            long edate = event.getEndTime();
+            
+            Calendar cursorCalendar = Calendar.getInstance();
+            cursorCalendar.setTimeZone(TimeZone.getDefault());
+            cursorCalendar.set(mDisplayMonth.get(Calendar.YEAR),  mDisplayMonth.get(Calendar.MONTH), 1);
+            cursorCalendar.set(Calendar.HOUR_OF_DAY, 0);   // clear() would not reset the hour of day
+            cursorCalendar.clear(Calendar.MINUTE);
+            cursorCalendar.clear(Calendar.SECOND);
+            cursorCalendar.clear(Calendar.MILLISECOND);
+            
+            Date cursorDate = cursorCalendar.getTime();
+            
+            do {
+                if (sdate <= cursorDate.getTime() && edate >= cursorDate.getTime()) {
+                    Log.e(TAG, "mCalendarEventList.size() [" + i + "] s=" + sdate + " e=" + edate + " c=" + cursorDate.getTime());
+                    addEvent(cursorCalendar.get(Calendar.DATE), title);
+                } else {
+                    Log.d(TAG, "mCalendarEventList.size() [" + i + "] s=" + sdate + " e=" + edate + " c=" + cursorDate.getTime());
+                }
+                cursorCalendar.add(Calendar.DATE, 1);
+                cursorDate = cursorCalendar.getTime();
+            } while (cursorDate.getTime() <= mLastDate.getTime());
+        }
     }
-	
-	private void setupMonthTitle() {
-        String dateTime = DateFormat.getDateInstance().format(new Date());
-        mTextMonthTitle.setText(dateTime);
-	}
-	
+    
+    private void addEvent(int date, String title) {
+        Log.d(TAG, "addEvent(" + date + ", " + title + ")");
+        TextView tv = findTextView(date);
+        if (tv != null) {
+            tv.setText(title);
+        } else {
+            Log.e(TAG, "Error! Can't find text veiw for date " + date);
+        }
+    }
+    
+    private TextView findTextView(int date) {
+        
+        return null;
+    }
+
 	private void setupDayOfWeekTitle() {
 	    Calendar calendar = Calendar.getInstance();
 	    LinearLayout mDayOfWeekLayout = (LinearLayout) findViewById(R.id.day_of_week_title);
